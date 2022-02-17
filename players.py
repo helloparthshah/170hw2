@@ -10,7 +10,6 @@ import os
 import sys
 from copy import deepcopy
 
-
 class connect4Player(object):
     def __init__(self, position, seed=0):
         self.position = position
@@ -373,11 +372,11 @@ class alphaBetaAI(minimaxAI):
         self.nmoves += 1
         totalmoves = env.shape[0]*env.shape[1]
         if(self.nmoves < totalmoves/3):
-            self.abpruning(env, 2, move)
-        elif(self.nmoves < totalmoves/2):
             self.abpruning(env, 3, move)
-        else:
+        elif(self.nmoves < totalmoves/2):
             self.abpruning(env, 4, move)
+        else:
+            self.abpruning(env, 5, move)
 
 
 SQUARESIZE = 100

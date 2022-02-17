@@ -86,7 +86,9 @@ def run_monte(player="minimaxAI"):
     print("Wins As Player 2: " + str(count_p2))
 
 
-# run_stupid()
-# run_random()
-run_monte()
-run_monte("alphaBetaAI")
+run_stupid()
+run_stupid("alphaBetaAI")
+run_random()
+run_random("alphaBetaAI")
+# run_monte()
+# run_monte("alphaBetaAI")
