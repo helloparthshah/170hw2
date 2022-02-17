@@ -93,8 +93,12 @@ class stupidAI(connect4Player):
 
 
 class minimaxAI(connect4Player):
+    def __init__(self, position, seed=0):
+        super().__init__(position, seed)
+        self.nmoves = 0
+
     def CalcStraight(self, env, n):
-        env = env.getEnv()
+        # env = env.getEnv()
         RowPlayer = 0
         RowOpponent = 0
         opponent = 2 if self.position == 1 else 1
@@ -160,7 +164,7 @@ class minimaxAI(connect4Player):
         return RowPlayer, RowOpponent
 
     def evaluationFunction(self, env):
-        env = env.getEnv()
+        # env = env.getEnv()
         # Get utility value of board
         # Calculate possible 4s, 3s and 2s in a row
         fourRowPlayer = 0
@@ -174,10 +178,10 @@ class minimaxAI(connect4Player):
         twoRowPlayer, twoRowOpponent = self.CalcStraight(env, 2)
         ''' print(fourRowPlayer, threeRowPlayer, twoRowPlayer,
               fourRowOpponent, threeRowOpponent, twoRowOpponent) '''
-        return (fourRowPlayer-fourRowOpponent*2)*1000 + (threeRowPlayer-threeRowOpponent*2)*10 + (twoRowPlayer-twoRowOpponent)*2
+        return (fourRowPlayer-fourRowOpponent*2)*100 + (threeRowPlayer-threeRowOpponent*2)*20 + (twoRowPlayer-twoRowOpponent)
 
     def getPossibleMoves(self, env):
-        env = env.getEnv()
+        # env = env.getEnv()
         possible = env.topPosition >= 0
         indices = []
         for i, p in enumerate(possible):
@@ -234,10 +238,73 @@ class minimaxAI(connect4Player):
     def play(self, env, move):
         env = env.getEnv()
         env.visualize = False
-        self.minimax(env, 2, move)
+        # self.minimax(env, 2, move)
+        self.nmoves += 1
+        totalmoves = env.shape[0]*env.shape[1]
+        if(self.nmoves < totalmoves/3):
+            self.minimax(env, 2, move)
+        elif(self.nmoves < totalmoves/2):
+            self.minimax(env, 3, move)
+        else:
+            self.minimax(env, 4, move)
 
 
 class alphaBetaAI(minimaxAI):
+    def __init__(self, position, seed=0):
+        super().__init__(position, seed)
+        self.nmoves = 0
+
+    def testsuccessor(self, env, i, j, n, player):
+        countSelf = 0
+        countBlank = 0
+        RowPlayer = 0
+        for k in range(n):
+            if(j+k >= env.shape[1]):
+                break
+            if env.board[i][j+k] == player:
+                countSelf += 1
+            elif env.board[i][j+k] == 0:
+                countBlank += 1
+        RowPlayer += (countSelf >= n-1 and countBlank == 1)
+        # Vertical
+        countSelf = 0
+        countBlank = 0
+        for k in range(n):
+            if i+k >= env.shape[0]:
+                break
+            if env.board[i+k][j] == self.position:
+                countSelf += 1
+            elif env.board[i+k][j] == 0:
+                countBlank += 1
+        RowPlayer += (countSelf >= n-1 and countBlank == 1)
+        # Diagonal
+        countSelf = 0
+        countBlank = 0
+        for k in range(n):
+            if i+k >= env.shape[0] or j+k >= env.shape[1]:
+                break
+            if env.board[i+k][j+k] == self.position:
+                countSelf += 1
+            elif env.board[i+k][j+k] == 0:
+                countBlank += 1
+        RowPlayer += (countSelf >= n-1 and countBlank == 1)
+        countSelf = 0
+        countBlank = 0
+        for k in range(n):
+            if i+k >= env.shape[0] or j-k < 0:
+                break
+            if env.board[i+k][j-k] == self.position:
+                countSelf += 1
+            elif env.board[i+k][j-k] == 0:
+                countBlank += 1
+        RowPlayer += (countSelf >= n-1 and countBlank == 1)
+        return RowPlayer
+
+    def successor(self, env, j, player):
+        env = env.getEnv()
+        i = env.topPosition[j]
+        return self.testsuccessor(env, i, j, 4, player)*100+self.testsuccessor(env, i, j, 3, player)*20+self.testsuccessor(env, i, j, 2, player)
+
     def getPossibleMoves(self, env, type="max"):
         env = env.getEnv()
         possible = env.topPosition >= 0
@@ -247,12 +314,12 @@ class alphaBetaAI(minimaxAI):
                 indices.append(i)
         random.shuffle(indices)
         # Sort based on evaluation function
-        ''' if type == "max":
-            indices.sort(key=lambda x: self.evaluationFunction(
-                self.simulateMove(env, x, self.position)), reverse=True)
-        else:
-            indices.sort(key=lambda x: self.evaluationFunction(
-                self.simulateMove(env, x, 2 if self.position == 1 else 1))) '''
+        if type == "max":
+            indices.sort(key=lambda x: self.successor(
+                env, x, self.position), reverse=True)
+        elif type == "min":
+            indices.sort(key=lambda x: self.successor(
+                env, x, 2 if self.position == 1 else 1), reverse=True)
         return indices
 
     def maxPlayer(self, env, depth, a, b):
@@ -303,7 +370,14 @@ class alphaBetaAI(minimaxAI):
     def play(self, env, move):
         env = env.getEnv()
         env.visualize = False
-        self.abpruning(env, 2, move)
+        self.nmoves += 1
+        totalmoves = env.shape[0]*env.shape[1]
+        if(self.nmoves < totalmoves/3):
+            self.abpruning(env, 2, move)
+        elif(self.nmoves < totalmoves/2):
+            self.abpruning(env, 3, move)
+        else:
+            self.abpruning(env, 4, move)
 
 
 SQUARESIZE = 100
@@ -326,4 +400,4 @@ size = (width, height)
 
 RADIUS = int(SQUARESIZE/2 - 5)
 # remove this line for csif
-screen = pygame.display.set_mode(size)
+# screen = pygame.display.set_mode(size)
