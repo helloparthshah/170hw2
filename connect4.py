@@ -1,6 +1,7 @@
 import numpy as np
 import math
-import os, sys
+import os
+import sys
 import pygame
 import random
 import time
@@ -12,8 +13,8 @@ from copy import deepcopy
 
 import threading
 
-def time_limit(func, args, time_):
 
+def time_limit(func, args, time_):
 	'''Python tries very, very hard to make sure you can't kill threads,
 	but with enough effort, anything is possible. Here, we uses traces
 	to inject a system exit exception on the next line of whatever the
@@ -29,6 +30,7 @@ def time_limit(func, args, time_):
 	t.start()
 	t.join(time_)
 	if t.is_alive():
+		print('Killing thread')
 		t.kill()
 
 class connect4():

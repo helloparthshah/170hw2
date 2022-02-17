@@ -93,115 +93,90 @@ class stupidAI(connect4Player):
 
 
 class minimaxAI(connect4Player):
-    def checkNHori(self, env, i, j, n):
+    def CalcStraight(self, env, n):
         env = env.getEnv()
-        count = 0
-        blanks = 0
-        # 2 5
-        for k in range(max(j-1, 0), min(j+n, env.shape[1])):
-            if env.board[i][k] == env.board[i][j]:
-                count += 1
-            elif env.board[i][k] == 0:
-                blanks += 1
-            else:
-                break
-        if count == n-1:
-            return blanks
-        return 0
-
-    def checkNVert(self, env, i, j, n):
-        env = env.getEnv()
-        count = 0
-        blanks = 0
-        for k in range(max(i-n+1, 0), i+1):
-            if env.board[k][j] == env.board[i][j]:
-                count += 1
-            elif env.board[k][j] == 0:
-                blanks += 1
-            else:
-                break
-        return (count == n-1) and (blanks == 1)
-
-    def checkNDiag(self, env, i, j, n):
-        env = env.getEnv()
-        count = 0
-        blanks = 0
-        total = 0
-        # column increasing and row increasing (Downward Diagonal)
-        col = max(j-1, 0)
-        # print(len(range(max(i-1, 0), min(i+n, env.shape[0]))))
-        for m in range(max(i-1, 0), min(i+n, env.shape[0])):
-            if(col >= min(j+n, env.shape[1])):
-                break
-            if(env.board[m][col] == env.board[i][j]):
-                count += 1
-            elif(env.board[m][col] == 0):
-                blanks += 1
-            else:
-                break
-            col += 1
-        if count == n-1:
-            total = blanks
-        # Upward Diagonal (column decreasing and row increasing)
-        count = 0
-        blanks = 0
-        col = max(j-1, 0)
-        for m in range(min(i+1, env.shape[0]-1), max(i-n+1, 0)-1, -1):
-            if(col >= env.shape[1]):
-                break
-            if(env.board[m][col] == env.board[i][j]):
-                count += 1
-            elif(env.board[m][col] == 0):
-                blanks += 1
-            else:
-                break
-            col += 1
-        if count == n-1:
-            total += blanks
-        # total += (count == n-1) and (blanks == 1)
-        return total
-
-    def hasBlankNei(self, env, i, j):
-        # check if there is a blank neighbor
-        env = env.getEnv()
-        for k in range(max(i-1, 0), min(i+2, env.shape[0])):
-            for l in range(max(j-1, 0), min(j+2, env.shape[1])):
-                if env.board[k][l] == 0:
-                    return True
-        return False
+        RowPlayer = 0
+        RowOpponent = 0
+        opponent = 2 if self.position == 1 else 1
+        # Horizontal
+        for row in range(env.shape[0]):
+            for col in range(env.shape[1]-(n-1)):
+                countSelf = 0
+                countOpp = 0
+                countBlank = 0
+                for i in range(n):
+                    if env.board[row][col+i] == self.position:
+                        countSelf += 1
+                    elif env.board[row][col+i] == opponent:
+                        countOpp += 1
+                    else:
+                        countBlank += 1
+                RowPlayer += (countSelf >= n-1 and countBlank == 1)
+                RowOpponent += (countOpp >= n-1 and countBlank == 1)
+        # Vertical
+        for col in range(env.shape[1]):
+            for row in range(env.shape[0]-(n-1)):
+                countSelf = 0
+                countOpp = 0
+                countBlank = 0
+                for i in range(n):
+                    if env.board[row+i][col] == self.position:
+                        countSelf += 1
+                    elif env.board[row+i][col] == opponent:
+                        countOpp += 1
+                    else:
+                        countBlank += 1
+                RowPlayer += (countSelf >= n-1 and countBlank == 1)
+                RowOpponent += (countOpp >= n-1 and countBlank == 1)
+        # Diagonal
+        for row in range(env.shape[0]-(n-1)):
+            for col in range(env.shape[1]-(n-1)):
+                countSelf = 0
+                countOpp = 0
+                countBlank = 0
+                for i in range(n):
+                    if env.board[row+i][col+i] == self.position:
+                        countSelf += 1
+                    elif env.board[row+i][col+i] == opponent:
+                        countOpp += 1
+                    else:
+                        countBlank += 1
+                RowPlayer += (countSelf >= n-1 and countBlank == 1)
+                RowOpponent += (countOpp >= n-1 and countBlank == 1)
+        for row in range(env.shape[0]-(n-1)):
+            for col in range(n-1, env.shape[1]):
+                countSelf = 0
+                countOpp = 0
+                countBlank = 0
+                for i in range(n):
+                    if env.board[row+i][col-i] == self.position:
+                        countSelf += 1
+                    elif env.board[row+i][col-i] == opponent:
+                        countOpp += 1
+                    else:
+                        countBlank += 1
+                RowPlayer += (countSelf >= n-1 and countBlank == 1)
+                RowOpponent += (countOpp >= n-1 and countBlank == 1)
+        return RowPlayer, RowOpponent
 
     def evaluationFunction(self, env):
         env = env.getEnv()
         # Get utility value of board
         # Calculate possible 4s, 3s and 2s in a row
-        opponent = 2 if self.position == 1 else 1
         fourRowPlayer = 0
         threeRowPlayer = 0
         twoRowPlayer = 0
         fourRowOpponent = 0
         threeRowOpponent = 0
         twoRowOpponent = 0
-        for i in range(env.shape[0]):
-            for j in range(env.shape[1]):
-                if env.board[i][j] == self.position and self.hasBlankNei(env, i, j):
-                    fourRowPlayer += (self.checkNHori(env, i, j, 4) +
-                                      self.checkNVert(env, i, j, 4)+self.checkNDiag(env, i, j, 4))
-                    threeRowPlayer += (self.checkNHori(env, i, j, 3) +
-                                       self.checkNVert(env, i, j, 3)+self.checkNDiag(env, i, j, 3))
-                    twoRowPlayer += (self.checkNHori(env, i, j, 2) +
-                                     self.checkNVert(env, i, j, 2)+self.checkNDiag(env, i, j, 2))
-                elif env.board[i][j] == opponent and self.hasBlankNei(env, i, j):
-                    fourRowOpponent += (self.checkNHori(env, i, j, 4) +
-                                        self.checkNVert(env, i, j, 4)+self.checkNDiag(env, i, j, 4))
-                    threeRowOpponent += (self.checkNHori(env, i, j, 3) +
-                                         self.checkNVert(env, i, j, 3)+self.checkNDiag(env, i, j, 3))
-                    twoRowOpponent += (self.checkNHori(env, i, j, 2) +
-                                       self.checkNVert(env, i, j, 2)+self.checkNDiag(env, i, j, 2))
-        print(fourRowPlayer, threeRowPlayer, twoRowPlayer,
-              fourRowOpponent, threeRowOpponent, twoRowOpponent)
-        return (fourRowPlayer-fourRowOpponent)*100 + (threeRowPlayer-threeRowOpponent)*20 + (twoRowPlayer-twoRowOpponent)
+        fourRowPlayer, fourRowOpponent = self.CalcStraight(env, 4)
+        threeRowPlayer, threeRowOpponent = self.CalcStraight(env, 3)
+        twoRowPlayer, twoRowOpponent = self.CalcStraight(env, 2)
+        ''' print(fourRowPlayer, threeRowPlayer, twoRowPlayer,
+              fourRowOpponent, threeRowOpponent, twoRowOpponent) '''
+        return (fourRowPlayer-fourRowOpponent*2)*1000 + (threeRowPlayer-threeRowOpponent*2)*10 + (twoRowPlayer-twoRowOpponent)*2
 
-    def getPossibleMoves(self, env, type="max"):
+    def getPossibleMoves(self, env):
         env = env.getEnv()
         possible = env.topPosition >= 0
         indices = []
@@ -251,7 +226,7 @@ class minimaxAI(connect4Player):
             if newBoard.gameOver(i, self.position):
                 move[:] = [i]
                 return
-            newMove = self.minPlayer(newBoard, depth)
+            newMove = self.minPlayer(newBoard, depth-1)
             if newMove > v:
                 v = newMove
                 move[:] = [i]
@@ -259,10 +234,7 @@ class minimaxAI(connect4Player):
     def play(self, env, move):
         env = env.getEnv()
         env.visualize = False
-        # print(self.checkWin(env))
-        # self.getBestMove(env, 3, move)
-        self.minimax(env, 1, move)
-        # self.minimax(env, 3, move)
+        self.minimax(env, 2, move)
 
 
 class alphaBetaAI(minimaxAI):
@@ -273,9 +245,14 @@ class alphaBetaAI(minimaxAI):
         for i, p in enumerate(possible):
             if p:
                 indices.append(i)
-        # random.shuffle(indices)
-        indices = sorted(indices, key=lambda x: self.evaluationFunction(
-            env), reverse=type == "max")
+        random.shuffle(indices)
+        # Sort based on evaluation function
+        ''' if type == "max":
+            indices.sort(key=lambda x: self.evaluationFunction(
+                self.simulateMove(env, x, self.position)), reverse=True)
+        else:
+            indices.sort(key=lambda x: self.evaluationFunction(
+                self.simulateMove(env, x, 2 if self.position == 1 else 1))) '''
         return indices
 
     def maxPlayer(self, env, depth, a, b):
@@ -316,7 +293,7 @@ class alphaBetaAI(minimaxAI):
             if newBoard.gameOver(i, self.position):
                 move[:] = [i]
                 return
-            newMove = self.minPlayer(newBoard, depth, -math.inf, math.inf)
+            newMove = self.minPlayer(newBoard, depth-1, -math.inf, math.inf)
             # print(newMove)
             if newMove > v:
                 v = newMove
@@ -326,18 +303,7 @@ class alphaBetaAI(minimaxAI):
     def play(self, env, move):
         env = env.getEnv()
         env.visualize = False
-        ''' env.board = [[0, 0, 0, 0, 0, 0, 0],
-                     [0, 0, 0, 0, 0, 0, 0],
-                     [0, 0, 0, 0, 0, 0, 0],
-                     [0, 0, 1, 2, 0, 0, 0],
-                     [0, 0, 0, 1, 2, 0, 0],
-                     [0, 0, 2, 2, 1, 1, 0]] '''
-
-        print(self.evaluationFunction(env))
-        # move[:] = [0]
-        # v = self.abpruning(env, 1, move)
         self.abpruning(env, 2, move)
-        env.visualize = True
 
 
 SQUARESIZE = 100

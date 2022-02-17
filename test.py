@@ -1,6 +1,7 @@
 import subprocess
 
-def run_stupid():
+
+def run_stupid(player="minimaxAI"):
     print("Testing Stupid AI")
     count_p1 = 0
     count_p2 = 0
@@ -9,7 +10,7 @@ def run_stupid():
     for i in range(1, 6):
         print("Testing Stupid AI seed: " + str(i))
         output = subprocess.check_output(
-            "python main.py -p1 minimaxAI -p2 stupidAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
+            "python main.py -p1 "+player + " -p2 stupidAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
         if "Player  1  has won" in output.decode("utf-8"):
             count_p1 += 1
             print("Our Player wins")
@@ -17,7 +18,7 @@ def run_stupid():
             print("Our Player loses")
 
         output = subprocess.check_output(
-            "python main.py -p2 minimaxAI -p1 stupidAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
+            "python main.py -p2 " + player + " -p1 stupidAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
         if "Player  2  has won" in output.decode("utf-8"):
             count_p2 += 1
             print("Our Player wins")
@@ -29,14 +30,16 @@ def run_stupid():
     print("\n\n")
 
 # Random AI
-def run_random():
+
+
+def run_random(player="minimaxAI"):
     print("Testing Random AI")
     count_p1 = 0
     count_p2 = 0
     for i in range(1, 6):
         print("Testing Random AI seed: " + str(i))
         output = subprocess.check_output(
-            "python main.py -p1 minimaxAI -p2 randomAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
+            "python main.py -p1 "+player+" -p2 randomAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
         if "Player  1  has won" in output.decode("utf-8"):
             count_p1 += 1
             print("Our Player wins")
@@ -44,7 +47,7 @@ def run_random():
             print("Our Player loses")
 
         output = subprocess.check_output(
-            "python main.py -p2 minimaxAI -p1 randomAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
+            "python main.py -p2 "+player+" -p1 randomAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
         if "Player  2  has won" in output.decode("utf-8"):
             count_p2 += 1
             print("Our Player wins")
@@ -56,13 +59,15 @@ def run_random():
     print("\n\n")
 
 # MonteCarlo AI
-def run_monte():
+
+
+def run_monte(player="minimaxAI"):
     print("Testing Monte Carlo AI")
     count_p1 = 0
     count_p2 = 0
     for i in range(1, 11):
         output = subprocess.check_output(
-            "python main.py -p1 minimaxAI -p2 monteCarloAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
+            "python main.py -p1 "+player+" -p2 monteCarloAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
         if "Player  1  has won" in output.decode("utf-8"):
             count_p1 += 1
             print("Our Player wins")
@@ -70,7 +75,7 @@ def run_monte():
             print("Our Player loses")
 
         output = subprocess.check_output(
-            "python main.py -p2 minimaxAI -p1 monteCarloAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
+            "python main.py -p2 "+player+" -p1 monteCarloAI -limit_players 1,2 -visualize False -seed "+str(i), shell=True)
         if "Player  2  has won" in output.decode("utf-8"):
             count_p2 += 1
             print("Our Player wins")
@@ -79,5 +84,9 @@ def run_monte():
 
     print("Wins As Player 1: " + str(count_p1))
     print("Wins As Player 2: " + str(count_p2))
-    
-run_stupid()
+
+
+# run_stupid()
+# run_random()
+run_monte()
+# run_monte("alphaBetaAI")
