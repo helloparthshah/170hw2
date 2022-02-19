@@ -10,6 +10,7 @@ import os
 import sys
 from copy import deepcopy
 
+
 class connect4Player(object):
     def __init__(self, position, seed=0):
         self.position = position
@@ -96,88 +97,107 @@ class minimaxAI(connect4Player):
         super().__init__(position, seed)
         self.nmoves = 0
 
-    def CalcStraight(self, env, n):
+    def CalcStraight(self, env):
         # env = env.getEnv()
-        RowPlayer = 0
-        RowOpponent = 0
+        winPlayer = 0
+        fourRowPlayer = 0
+        fourRowOpponent = 0
+        threeRowPlayer = 0
+        threeRowOpponent = 0
+        twoRowPlayer = 0
+        twoRowOpponent = 0
         opponent = 2 if self.position == 1 else 1
         # Horizontal
         for row in range(env.shape[0]):
-            for col in range(env.shape[1]-(n-1)):
+            for col in range(env.shape[1]-(3)):
                 countSelf = 0
                 countOpp = 0
                 countBlank = 0
-                for i in range(n):
+                for i in range(4):
                     if env.board[row][col+i] == self.position:
                         countSelf += 1
                     elif env.board[row][col+i] == opponent:
                         countOpp += 1
                     else:
                         countBlank += 1
-                RowPlayer += (countSelf >= n-1 and countBlank == 1)
-                RowOpponent += (countOpp >= n-1 and countBlank == 1)
+                winPlayer += countSelf == 4
+                fourRowPlayer += (countSelf == 3 and countBlank == 1)
+                fourRowOpponent += (countOpp == 3 and countBlank == 1)
+                threeRowPlayer += (countSelf == 2 and countBlank == 2)
+                threeRowOpponent += (countOpp == 2 and countBlank == 2)
+                twoRowPlayer += (countSelf == 1 and countBlank == 3)
+                twoRowOpponent += (countOpp == 1 and countBlank == 3)
         # Vertical
         for col in range(env.shape[1]):
-            for row in range(env.shape[0]-(n-1)):
+            for row in range(env.shape[0]-(3)):
                 countSelf = 0
                 countOpp = 0
                 countBlank = 0
-                for i in range(n):
+                for i in range(4):
                     if env.board[row+i][col] == self.position:
                         countSelf += 1
                     elif env.board[row+i][col] == opponent:
                         countOpp += 1
                     else:
                         countBlank += 1
-                RowPlayer += (countSelf >= n-1 and countBlank == 1)
-                RowOpponent += (countOpp >= n-1 and countBlank == 1)
+                winPlayer += countSelf == 4
+                fourRowPlayer += (countSelf == 3 and countBlank == 1)
+                fourRowOpponent += (countOpp == 3 and countBlank == 1)
+                threeRowPlayer += (countSelf == 2 and countBlank == 2)
+                threeRowOpponent += (countOpp == 2 and countBlank == 2)
+                twoRowPlayer += (countSelf == 1 and countBlank == 3)
+                twoRowOpponent += (countOpp == 1 and countBlank == 3)
         # Diagonal
-        for row in range(env.shape[0]-(n-1)):
-            for col in range(env.shape[1]-(n-1)):
+        for row in range(env.shape[0]-(3)):
+            for col in range(env.shape[1]-(3)):
                 countSelf = 0
                 countOpp = 0
                 countBlank = 0
-                for i in range(n):
+                for i in range(4):
                     if env.board[row+i][col+i] == self.position:
                         countSelf += 1
                     elif env.board[row+i][col+i] == opponent:
                         countOpp += 1
                     else:
                         countBlank += 1
-                RowPlayer += (countSelf >= n-1 and countBlank == 1)
-                RowOpponent += (countOpp >= n-1 and countBlank == 1)
-        for row in range(env.shape[0]-(n-1)):
-            for col in range(n-1, env.shape[1]):
+                winPlayer += countSelf == 4
+                fourRowPlayer += (countSelf == 3 and countBlank == 1)
+                fourRowOpponent += (countOpp == 3 and countBlank == 1)
+                threeRowPlayer += (countSelf == 2 and countBlank == 2)
+                threeRowOpponent += (countOpp == 2 and countBlank == 2)
+                twoRowPlayer += (countSelf == 1 and countBlank == 3)
+                twoRowOpponent += (countOpp == 1 and countBlank == 3)
+        for row in range(env.shape[0]-(3)):
+            for col in range(3, env.shape[1]):
                 countSelf = 0
                 countOpp = 0
                 countBlank = 0
-                for i in range(n):
+                for i in range(4):
                     if env.board[row+i][col-i] == self.position:
                         countSelf += 1
                     elif env.board[row+i][col-i] == opponent:
                         countOpp += 1
                     else:
                         countBlank += 1
-                RowPlayer += (countSelf >= n-1 and countBlank == 1)
-                RowOpponent += (countOpp >= n-1 and countBlank == 1)
-        return RowPlayer, RowOpponent
+                winPlayer += countSelf == 4
+                fourRowPlayer += (countSelf == 3 and countBlank == 1)
+                fourRowOpponent += (countOpp == 3 and countBlank == 1)
+                threeRowPlayer += (countSelf == 2 and countBlank == 2)
+                threeRowOpponent += (countOpp == 2 and countBlank == 2)
+                twoRowPlayer += (countSelf == 1 and countBlank == 3)
+                twoRowOpponent += (countOpp == 1 and countBlank == 3)
+        return winPlayer, fourRowPlayer, fourRowOpponent, threeRowPlayer, threeRowOpponent, twoRowPlayer, twoRowOpponent
 
     def evaluationFunction(self, env):
         # env = env.getEnv()
         # Get utility value of board
         # Calculate possible 4s, 3s and 2s in a row
-        fourRowPlayer = 0
-        threeRowPlayer = 0
-        twoRowPlayer = 0
-        fourRowOpponent = 0
-        threeRowOpponent = 0
-        twoRowOpponent = 0
-        fourRowPlayer, fourRowOpponent = self.CalcStraight(env, 4)
-        threeRowPlayer, threeRowOpponent = self.CalcStraight(env, 3)
-        twoRowPlayer, twoRowOpponent = self.CalcStraight(env, 2)
+        # return self.score_position(env.board, self.position)
+        winPlayer, fourRowPlayer, fourRowOpponent, threeRowPlayer, threeRowOpponent, twoRowPlayer, twoRowOpponent = self.CalcStraight(
+            env)
         ''' print(fourRowPlayer, threeRowPlayer, twoRowPlayer,
               fourRowOpponent, threeRowOpponent, twoRowOpponent) '''
-        return (fourRowPlayer-fourRowOpponent*2)*100 + (threeRowPlayer-threeRowOpponent*2)*20 + (twoRowPlayer-twoRowOpponent)
+        return winPlayer*1000+(fourRowPlayer*8-fourRowOpponent*10) + (threeRowPlayer*3-threeRowOpponent)+twoRowPlayer-twoRowOpponent
 
     def getPossibleMoves(self, env):
         # env = env.getEnv()
@@ -399,4 +419,4 @@ size = (width, height)
 
 RADIUS = int(SQUARESIZE/2 - 5)
 # remove this line for csif
-# screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size)

@@ -43,7 +43,7 @@ class connect4():
 		width = self.shape[1] * SQUARESIZE
 		height = (self.shape[0] + 1) * SQUARESIZE
 		pygame.init()
-		# screen = pygame.display.set_mode(size) #CSIF
+		screen = pygame.display.set_mode(size) #CSIF
 		# Continue initialization
 		self.board = np.zeros(board_shape).astype('int32')
 		self.topPosition = (np.ones(board_shape[1]) * (board_shape[0]-1)).astype('int32')
@@ -100,10 +100,10 @@ class connect4():
 		move = self.playTurn()
 		while not self.gameOver(move, player):
             # Remove for testing on csif 
-			''' for event in pygame.event.get():
+			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
-					sys.exit() '''
+					sys.exit()
 			player = self.turnPlayer.position
 			move = self.playTurn()
 		if self.save:
