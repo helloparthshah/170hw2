@@ -1,5 +1,5 @@
 
-##Command
+#Command
 
 python main.py -p1 minimaxAI -p2 stupidAI -limit_players 1,2 -visualize False -verbose True -seed 0
 
